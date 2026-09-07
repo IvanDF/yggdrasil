@@ -26,39 +26,69 @@ for what it does.
 
 ## The realms
 
+**Home & media**
+
 | Realm | Role | Stack |
 |---|---|---|
 | **Heimdallr** | The watchman — home automation & dashboards | Home Assistant |
 | **Bragi** | The bard — personal media library | Jellyfin |
-| **Muninn** | Memory — automated encrypted backups | BorgBackup |
+
+**The AI court**
+
+| Realm | Role | Stack |
+|---|---|---|
 | **Ratatoskr** | The messenger — agentic AI over Telegram (text + voice) | Python · LLM · Whisper |
 | **Kvasir** | The counselor — keeps my professional presence coherent | Python · LLM |
 | **Huginn** | Thought — a sandboxed AI coding agent, one home per identity | Podman · Playwright |
-| **Draupnir** | The ring that drips gold — a price watcher | Python |
+| **Nidavellir** | The dwarves' forge — the dev toolbox the agents are built from | Toolbox · Podman |
+
+**Keepers & network**
+
+| Realm | Role | Stack |
+|---|---|---|
+| **Muninn** | Memory — automated encrypted backups | BorgBackup |
+| **Draupnir** | The ring that drips gold — a small price watcher | Python |
+| **Njord** | The sea-god — a private VPN network gateway | Gluetun · VPN |
 
 ## Architecture
 
 ```mermaid
 flowchart TB
-    user([Me]) <--> TG([Telegram])
-    user <-.remote.-> TS([Tailscale])
-    TG <--> R
-    TS <--> host
+    me([Me]) --> TG([Telegram])
+    me -. remote .-> TS([Tailscale])
 
     subgraph host["HP Elite x2 · Fedora Silverblue · rootless Podman"]
-        H[Heimdallr<br/>Home Assistant]
-        B[Bragi<br/>Jellyfin]
-        M[Muninn<br/>Backups]
-        R[Ratatoskr<br/>Telegram AI]
-        K[Kvasir<br/>Brand agent]
-        HU[Huginn<br/>AI sandbox]
-        D[Draupnir<br/>Price watch]
+        direction TB
+
+        subgraph home["🏠 Home &amp; media"]
+            H[Heimdallr · Home Assistant]
+            B[Bragi · Jellyfin]
+        end
+
+        subgraph court["🧠 The AI court"]
+            R[Ratatoskr · Telegram agent]
+            K[Kvasir · brand agent]
+            HU[Huginn · AI sandbox]
+            NID[Nidavellir · dev forge]
+        end
+
+        subgraph keep["🛡️ Keepers &amp; network"]
+            M[Muninn · backups]
+            D[Draupnir · price watch]
+            NJ[Njord · VPN gateway]
+        end
     end
 
+    TG <--> R
+    TS <--> host
     R <--> H
-    R <--> LLM([LLM · free-tier / local])
-    K <--> LLM
+    R --> LLM([LLM · free-tier / local])
+    K --> LLM
+    HU -. built from .-> NID
 ```
+
+> Access is either the **Telegram** bot (day to day) or **Tailscale** (a private
+> mesh, for admin) — never a port exposed to the open internet.
 
 ## Principles
 
